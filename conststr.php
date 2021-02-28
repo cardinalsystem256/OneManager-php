@@ -424,9 +424,9 @@ $constStr = [
         'zh-tw' => '修改標籤',
         'ar-sa' => 'تغيير التسمية',
     ],
-    'ChangeOnedrivetype' => [
-        'en-us' => 'Change Onedrive/Sharepoint',
-        'zh-cn' => '切换Onedrive/Sharepoint',
+    'ChangeDrivetype' => [
+        'en-us' => 'Change',
+        'zh-cn' => '切换',
     ],
     'AddDisk' => [
         'en-us' => 'Add Disk',
