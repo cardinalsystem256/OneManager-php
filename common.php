@@ -619,12 +619,12 @@ function array_value_isnot_null($arr)
     return $arr!=='';
 }
 
-function curl($method, $url, $data = '', $headers = [], $returnheader = 0)
+function curl($method, $url, $data = '', $headers = [], $returnheader = 0, $location = 0)
 {
     //if (!isset($headers['Accept'])) $headers['Accept'] = '*/*';
     //if (!isset($headers['Referer'])) $headers['Referer'] = $url;
     //if (!isset($headers['Content-Type'])) $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    if (!(isset($headers['Content-Type'])||isset($headers['content-type']))) $headers['Content-Type'] = '';
+    if (!isset($headers['Content-Type'])&&!isset($headers['content-type'])) $headers['Content-Type'] = '';
     $sendHeaders = array();
     foreach ($headers as $headerName => $headerVal) {
         $sendHeaders[] = $headerName . ': ' . $headerVal;
@@ -640,6 +640,7 @@ function curl($method, $url, $data = '', $headers = [], $returnheader = 0)
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $sendHeaders);
+    if ($location) curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     //$response['body'] = curl_exec($ch);
     if ($returnheader) {
         list($returnhead, $response['body']) = explode("\r\n\r\n", curl_exec($ch));
@@ -1317,7 +1318,7 @@ function EnvOpt($needUpdate = 0)
     <tr>
         <td>Driver</td>
         <td>' . getConfig('Driver', $disktag);
-            if ($diskok && baseclassofdrive($disk_tmp)!='Aliyundrive') $html .= ' <a href="?AddDisk=' . get_class($disk_tmp) . '&disktag=' . $disktag . '&SelectDrive">' . getconstStr('ChangeOnedrivetype') . '</a>';
+            if ($diskok && baseclassofdrive($disk_tmp)!='Aliyundrive') $html .= ' <a href="?AddDisk=' . get_class($disk_tmp) . '&disktag=' . $disktag . '&SelectDrive">' . getconstStr('ChangeDrivetype') . '</a>';
             $html .= '</td>
     </tr>
     ';
@@ -1984,7 +1985,8 @@ function render_list($path = '', $files = [])
             $html = str_replace('<!--constStr@ClicktoEdit-->', getconstStr('ClicktoEdit'), $html);
             $html = str_replace('<!--constStr@CancelEdit-->', getconstStr('CancelEdit'), $html);
             $html = str_replace('<!--constStr@Save-->', getconstStr('Save'), $html);
-            while (strpos($html, '<!--TxtContent-->')) $html = str_replace('<!--TxtContent-->', htmlspecialchars(curl('GET', $files['url'])['body']), $html);
+            while (strpos($html, '<!--TxtContent-->')) $html = str_replace('<!--TxtContent-->', htmlspecialchars(curl('GET', $files['url'], '', '', 0, 1)['body']), $html);
+            //while (strpos($html, '<!--TxtContent-->')) $html = str_replace('<!--TxtContent-->', htmlspecialchars(get_content(spurlencode(path_format(urldecode($path) . '/' . $files['name']), '/'))['content']['body']), $html);
             $html = str_replace('<!--constStr@FileNotSupport-->', getconstStr('FileNotSupport'), $html);
 
 
