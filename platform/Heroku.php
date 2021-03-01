@@ -172,21 +172,25 @@ function install()
                 $APIKey = $_POST['APIKey'];
                 $tmp['APIKey'] = $APIKey;
             }
-            $function_name = getConfig('function_name');
-            if ($function_name=='') {
-		        $tmp1 = substr($_SERVER['HTTP_HOST'], 0, strrpos($_SERVER['HTTP_HOST'], '.'));
-		        $maindomain = substr($tmp1, strrpos($tmp1, '.')+1);
-		        if ($maindomain=='herokuapp') $function_name = substr($tmp1, 0, strrpos($tmp1, '.'));
-                else return message('Please visit from xxxx.herokuapp.com', '', 500);
-                $res = HerokuAPI('GET', 'https://api.heroku.com/apps/' . $function_name, '', $APIKey);
-                $response = json_decode($res['body'], true);
-                if (isset($response['build_stack'])) {
-                    $tmp['HerokuappId'] = $response['id'];
-                } else {
-                    return message('Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT), 'Something error', 500);
+            $HerokuappId = getConfig('HerokuappId');
+            if ($HerokuappId=='') {
+                $function_name = getConfig('function_name');
+                if ($function_name=='') {
+                    $tmp1 = substr($_SERVER['HTTP_HOST'], 0, strrpos($_SERVER['HTTP_HOST'], '.'));
+                    $maindomain = substr($tmp1, strrpos($tmp1, '.')+1);
+                    if ($maindomain=='herokuapp') $function_name = substr($tmp1, 0, strrpos($tmp1, '.'));
+                    else return message('Please visit from xxxx.herokuapp.com', '', 500);
+                    $res = HerokuAPI('GET', 'https://api.heroku.com/apps/' . $function_name, '', $APIKey);
+                    $response = json_decode($res['body'], true);
+                    if (isset($response['build_stack'])) {
+                        $HerokuappId = $response['id'];
+                    } else {
+                        return message('Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT), 'Something error', 500);
+                    }
                 }
-	        }
-            $response = json_decode(setHerokuConfig($tmp, $tmp['HerokuappId'], $APIKey)['body'], true);
+            }
+            $tmp['HerokuappId'] = $HerokuappId;
+            $response = json_decode(setHerokuConfig($tmp, $HerokuappId, $APIKey)['body'], true);
             if (api_error($response)) {
                 $html = api_error_msg($response);
                 $title = 'Error';
@@ -194,7 +198,7 @@ function install()
                 return output('Jump
     <script>
         var expd = new Date();
-        expd.setTime(expd.getTime()+(2*60*60*1000));
+        expd.setTime(expd.getTime()+1000);
         var expires = "expires="+expd.toGMTString();
         document.cookie=\'language=; path=/; \'+expires;
     </script>
