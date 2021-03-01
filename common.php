@@ -17,7 +17,7 @@ $EnvConfigs = [
     'HW_urn'            => 0b000, // used in FG.
     'HW_key'            => 0b000, // used in FG.
     'HW_secret'         => 0b000, // used in FG.
-    'function_name'     => 0b000, // used in heroku.
+    'HerokuappId'       => 0b000, // used in heroku.
 
     'admin'             => 0b000,
     'adminloginpage'    => 0b010,
