@@ -4,7 +4,7 @@ function getpath()
 {
     if (getConfig('function_name') && getConfig('APIKey')) {
         $APIKey = getConfig('APIKey');
-        $res = getHerokuConfig(getConfig('function_name'), $APIKey);
+        $res = HerokuAPI('GET', 'https://api.heroku.com/apps/' . getConfig('function_name'), '', $APIKey);
         $response = json_decode($res['body'], true);
         if (isset($response['build_stack'])) {
             $tmp['HerokuappId'] = $response['id'];
@@ -178,7 +178,7 @@ function install()
 		        $maindomain = substr($tmp1, strrpos($tmp1, '.')+1);
 		        if ($maindomain=='herokuapp') $function_name = substr($tmp1, 0, strrpos($tmp1, '.'));
                 else return message('Please visit from xxxx.herokuapp.com', '', 500);
-                $res = getHerokuConfig($function_name, $APIKey);
+                $res = HerokuAPI('GET', 'https://api.heroku.com/apps/' . $function_name, '', $APIKey);
                 $response = json_decode($res['body'], true);
                 if (isset($response['build_stack'])) {
                     $tmp['HerokuappId'] = $response['id'];
