@@ -10,19 +10,21 @@ function getpath()
             $tmp['HerokuappId'] = $response['id'];
             $tmp['function_name'] = '';
         } else {
-            return message('Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT), 'Something error', 500);
+            error_log1('Something error' . 'Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT));
+            //return message('Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT), 'Something error', 500);
         }
         $response = json_decode(setHerokuConfig($tmp, $tmp['HerokuappId'], $APIKey)['body'], true);
         $title = 'Change function_name to HerokuappId';
         if (api_error($response)) {
             $html = api_error_msg($response);
             $stat = 500;
+            error_log1('Change function_name to HerokuappId' . $html);
         } else {
             $html = getconstStr('Wait') . ' 5s, jump to index.
             <meta http-equiv="refresh" content="5;URL=/">';
             $stat = 201;
         }
-        return message($html, $title, $stat);
+        //return message($html, $title, $stat);
     }
     $_SERVER['firstacceptlanguage'] = strtolower(splitfirst(splitfirst($_SERVER['HTTP_ACCEPT_LANGUAGE'],';')[0],',')[0]);
     $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
