@@ -8,7 +8,7 @@ function getpath()
         $response = json_decode($res['body'], true);
         if (isset($response['build_stack'])) {
             $tmp['HerokuappId'] = $response['id'];
-            $tmp['function_name'] = '';
+            $tmp['function_name'] = null;
         } else {
             error_log1('Something error' . 'Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT));
             //return message('Get Heroku app id: ' . json_encode($res, JSON_PRETTY_PRINT), 'Something error', 500);
