@@ -52,6 +52,7 @@ $EnvConfigs = [
     'default_sbox_drive_id'=> 0b100,
 
     'diskname'          => 0b111,
+    'diskDescription'   => 0b111,
     'domain_path'       => 0b111,
     'downloadencrypt'   => 0b110,
     'guestup_path'      => 0b111,
@@ -1144,9 +1145,6 @@ function EnvOpt($needUpdate = 0)
                     if (!isset($tmp[$disktag])) $tmp[$disktag] = '';
                 }
                 $tmp['disktag'] = $tmptag;
-                foreach (explode('|', $tmptag) as $disktag) {
-                    $tmp[$disktag] = json_encode($tmp[$disktag]);
-                }
                 $response = setConfigResponse( setConfig($tmp, $_SERVER['disk_oprating']) );
                 if (api_error($response)) {
                     return output("{\"Error\": \"" . api_error_msg($response) . "\"}", 500);
