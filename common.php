@@ -1112,7 +1112,14 @@ function EnvOpt($needUpdate = 0)
                     }
                 }
                 foreach ($disktags as $disktag) {
-                    $tmp[$disktag] = getConfig($disktag);
+                    $d = getConfig($disktag);
+                    if ($d === '') {
+                        $d = '';
+                    } elseif (gettype($d)=='array') {
+                        $tmp[$disktag] = $d;
+                    } else {
+                        $tmp[$disktag] = json_decode($d, true);
+                    }
                 }
                 unset($tmp['admin']);
                 return output(json_encode($tmp, JSON_PRETTY_PRINT));
@@ -1122,14 +1129,14 @@ function EnvOpt($needUpdate = 0)
                 $c = '{' . splitfirst($_POST['config_t'], '{')[1];
                 $c = splitlast($c, '}')[0] . '}';
                 $tmp = json_decode($c, true);
-                if (!!!$tmp) return output("{\"Error\": \"Config input error.\"}", 403);
+                if (!!!$tmp) return output("{\"Error\": \"Config input error. " . $c . "\"}", 403);
                 $tmptag = $tmp['disktag'];
                 foreach ($EnvConfigs as $env => $v) {
                     if (isCommonEnv($env)) {
                         if (isShowedEnv($env)) {
                             if (getConfig($env)!=''&&!isset($tmp[$env])) $tmp[$env] = '';
                         } else {
-                            $tmp[$env] = '';
+                            unset($tmp[$env]);
                         }
                     }
                 }
@@ -1137,6 +1144,9 @@ function EnvOpt($needUpdate = 0)
                     if (!isset($tmp[$disktag])) $tmp[$disktag] = '';
                 }
                 $tmp['disktag'] = $tmptag;
+                foreach (explode('|', $tmptag) as $disktag) {
+                    $tmp[$disktag] = json_encode($tmp[$disktag]);
+                }
                 $response = setConfigResponse( setConfig($tmp, $_SERVER['disk_oprating']) );
                 if (api_error($response)) {
                     return output("{\"Error\": \"" . api_error_msg($response) . "\"}", 500);
@@ -1343,7 +1353,7 @@ function EnvOpt($needUpdate = 0)
             } else {
                 $html .= '
     <tr>
-        <td colspan="2">' . ($disk_tmp->error['body']?$disk_tmp->error['body']:'Add this disk again.') . '</td>
+        <td colspan="2">' . ($disk_tmp->error['body']?$disk_tmp->error['stat'] . '<br>' . $disk_tmp->error['body']:'Add this disk again.') . '</td>
     </tr>';
             }
             $html .= '
@@ -1372,19 +1382,15 @@ function EnvOpt($needUpdate = 0)
         }
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "");
-        //xhr.setRequestHeader("User-Agent","qkqpttgf/OneManager");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
         xhr.onload = function(e){
             console.log(xhr.responseText+","+xhr.status);
             if (xhr.status==200) {
                 var res = JSON.parse(xhr.responseText);
-                //if ("Success" in res) {
-                //    alert("Import success");
-                //} else {
-                    config_f.config_t.value = xhr.responseText;
-                    config_f.parentNode.style = "width: 100%";
-                    config_f.config_t.style = "width: 100%";
-                    config_f.config_t.style.height = config_f.config_t.scrollHeight + "px";
-                //}
+                config_f.config_t.value = xhr.responseText;
+                config_f.parentNode.style = "width: 100%";
+                config_f.config_t.style = "width: 100%";
+                config_f.config_t.style.height = config_f.config_t.scrollHeight + "px";
             } else {
                 alert(xhr.status+"\n"+xhr.responseText);
             }
@@ -1393,8 +1399,6 @@ function EnvOpt($needUpdate = 0)
             alert("Network Error "+xhr.status);
         }
         xhr.send("pass=" + config_f.pass.value + "&config_b=" + b.value);
-
-        //return false;
     }
     function importConfig(b) {
         if (config_f.pass.value=="") {
@@ -1414,17 +1418,12 @@ function EnvOpt($needUpdate = 0)
         }
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "");
-        //xhr.setRequestHeader("User-Agent","qkqpttgf/OneManager");
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");
         xhr.onload = function(e){
             console.log(xhr.responseText+","+xhr.status);
             if (xhr.status==200) {
-                var res = JSON.parse(xhr.responseText);
-                //if ("Success" in res) {
-                    alert("Import success");
-                //} else {
-                //    config_f.config_t.style = "width: 100%";
-                //    config_f.config_t.value = xhr.responseText;
-                //}
+                //var res = JSON.parse(xhr.responseText);
+                alert("Import success");
             } else {
                 alert(xhr.status+"\n"+xhr.responseText);
             }
@@ -1432,9 +1431,7 @@ function EnvOpt($needUpdate = 0)
         xhr.onerror = function(e){
             alert("Network Error "+xhr.status);
         }
-        xhr.send("pass=" + config_f.pass.value + "&config_t=" + config_f.config_t.value + "&config_b=" + b.value);
-
-        //return false;
+        xhr.send("pass=" + config_f.pass.value + "&config_t=" + encodeURIComponent(config_f.config_t.value) + "&config_b=" + b.value);
     }
 </script><br>';
     $Diver_arr = scandir(__DIR__ . $slash . 'disk');
